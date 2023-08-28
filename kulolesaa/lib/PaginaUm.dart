@@ -13,7 +13,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:image_network/image_network.dart';
 import 'package:intl/intl.dart';
 import 'package:kulolesaa/Home.dart';
-import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+// import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/animation.dart';
@@ -200,7 +200,7 @@ TextEditingController pesquisa = new TextEditingController();
                                           type: PageTransitionType.leftToRight,
                                           alignment: Alignment.center,
                                           duration: Duration(milliseconds: 200),
-                                          child: SearchBar()),
+                                          child: SearchBarr()),
                                     );
                                   },
                                   child: Container(
@@ -2435,7 +2435,6 @@ class _ServicesState extends State<Services> {
                     ),
                     Text(" " +widget.preco, style: TextStyle(
                       color: Colors.grey[800],
-                      fontFamily: "pp2",
                       fontSize: 30,
                       ),
                     ),

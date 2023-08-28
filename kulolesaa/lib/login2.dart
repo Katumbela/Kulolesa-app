@@ -476,10 +476,11 @@ class _FirstScreenState extends State<FirstScreen> {
                       PageTransition(
                         type: PageTransitionType.topToBottom,
                         duration: Duration(milliseconds: 100),
-                        child: SearchBar(),
+                        child: SearchBarr(),
                       ),
                     );
                   },
+
                   child: Container(
                     padding: EdgeInsets.only(top: 10, left: 10.0),
                     decoration: BoxDecoration(

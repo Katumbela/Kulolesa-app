@@ -14,7 +14,6 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kulolesaa/Home.dart';
-import 'package:kulolesaa/new.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_snackbar/timer_snackbar.dart';

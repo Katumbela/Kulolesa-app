@@ -782,9 +782,11 @@ class _VerState extends State<Ver> {
                       ),
                     ]
                 ),
+
                 SizedBox(
                   height: 20,
                 ),
+                
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14.0),
                   child: Container(
@@ -1812,6 +1814,8 @@ class Favoritos extends StatelessWidget {
     );
   }
 }
+
+
 
 class DadosPerfil extends StatefulWidget {
   @override

@@ -14,7 +14,8 @@ import 'package:timer_snackbar/timer_snackbar.dart';
 
 import 'PaginaUm.dart';
 
-class SearchBar extends StatefulWidget {
+class SearchBarr extends StatefulWidget {
+
   @override
   State createState() {
     return _SearchBar();
