@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "870754886982",
+    "firebase_url": "https://kulolesaapp-default-rtdb.firebaseio.com",
+    "project_id": "kulolesaapp",
+    "storage_bucket": "kulolesaapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870754886982:android:b1f071282b7652c612f147",
+        "android_client_info": {
+          "package_name": "com.arotec.katumbela.kulolesa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "870754886982-7e39rpq2ssi0rv4hl489ul93kt3b4m40.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDveabwnfZWJVLvkGuIaeMxNsmfMoB5yds"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "870754886982-7e39rpq2ssi0rv4hl489ul93kt3b4m40.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "870754886982-50e57hlv7ioj2eve39los26sjuqsf305.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.arotec.katumbela.kulolesa"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
