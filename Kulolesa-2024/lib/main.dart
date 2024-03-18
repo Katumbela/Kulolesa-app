@@ -7,7 +7,6 @@ import 'package:kulolesa/pages/home.dart';
 import 'package:kulolesa/pages/inicio.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'firebase_options.dart';
 import 'models/user_provider.dart';
 
@@ -37,7 +36,6 @@ void main() async {
     ),
   );
 }
-
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;

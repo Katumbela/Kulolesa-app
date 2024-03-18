@@ -311,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.blue[700], // Define a cor de fundo azul[700]
+                      backgroundColor: Colors.blue[700], // Define a cor de fundo azul[700]
                     ),
                     child: _isLoading
                         ? SizedBox(

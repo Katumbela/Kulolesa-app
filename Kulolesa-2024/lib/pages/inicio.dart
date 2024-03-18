@@ -6,11 +6,14 @@ import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:kulolesa/detalhesActividades.dart';
 import 'package:kulolesa/estilos/estilo.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:kulolesa/models/pesquisar.dart';
 import 'package:kulolesa/pages/PaginaExpe.dart';
 import 'package:kulolesa/pages/PaginaTransp.dart';
 import 'package:kulolesa/pages/acomPage.dart';
+import 'package:kulolesa/pages/chooseSearchType.dart';
 import 'package:kulolesa/pages/detalhesAcom.dart';
 import 'package:kulolesa/pages/detalhestransp.dart';
 import 'package:kulolesa/pages/notificacoes.dart';
@@ -18,13 +21,15 @@ import 'package:kulolesa/pages/perfil.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:kulolesa/pages/perfil/agendamentos.dart';
 import 'package:kulolesa/pages/perfil/escolher_post_servicos.dart';
+import 'package:kulolesa/pages/searchActivities.dart';
+import 'package:kulolesa/pages/searchCars.dart';
+import 'package:kulolesa/pages/searchHosts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import '../models/provider.dart';
 import '../models/servicos_model.dart';
-import '../models/pesquisar.dart';
 import '../models/sponsored_models.dart';
 import '../models/user_provider.dart';
 import '../widgets/saudacao.dart';
@@ -45,6 +50,65 @@ class _InicioState extends State<Inicio> {
   List<TodosTranspModel> patrocinadosTransp = [];
   List<PatrocinadosAcomModel> patrocinadosAcom = [];
 
+  List<PatrocinadosAcomModel> sponsoredAcom = [];
+
+  List<TodasActividadesModel> patrocinadosActividades = [];
+  List<TodasActividadesModel> TodasActividades = [];
+  List<TodosTranspModel> TodosTransportes = [];
+  List<TodosTranspModel> todosTranspOriginal =
+      []; // Mantenha uma cópia dos dados originais
+
+  void _getSponsoredT() async {
+    List<TodosTranspModel> allTransportes =
+        await TodosTranspModel.getAllTransp();
+
+    // Filtrar os transportes com sponsor igual a true
+    patrocinadosTransp =
+        allTransportes.where((transp) => transp.sponsor).toList();
+  }
+
+  void _getAllTransp() async {
+    todosTranspOriginal =
+        await TodosTranspModel.getAllTransp(); // Preencha a lista original
+    TodosTransportes =
+        todosTranspOriginal; // Inicialize a lista de resultados com os dados originais
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _getAllActivities() async {
+    TodasActividades = await TodasActividadesModel.getAllActivities();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _getSponsoredActivities() async {
+    List<TodasActividadesModel> allActivities =
+        await TodasActividadesModel.getAllActivities();
+
+    // Filtrar os transportes com sponsor igual a true
+    patrocinadosActividades =
+        allActivities.where((transp) => transp.sponsor).toList();
+  }
+
+  void _getSponsoredAcom() async {
+    patrocinadosAcom = await PatrocinadosAcomModel.getSponsoredAcom();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _getSponsoredA() async {
+    List<PatrocinadosAcomModel> allSponsorAcom =
+        await PatrocinadosAcomModel.getSponsoredAcom();
+
+    // Filtrar os transportes com sponsor igual a true
+    sponsoredAcom =
+        allSponsorAcom.where((acomodacao) => acomodacao.sponsor).toList();
+  }
+
   void _getServicos() {
     servicos = ServicosModel.getServices();
   }
@@ -59,13 +123,6 @@ class _InicioState extends State<Inicio> {
   }
 
   bool _isLoading = true;
-
-  void _getSponsoredAcom() async {
-    patrocinadosAcom = await PatrocinadosAcomModel.getSponsoredAcom();
-    setState(() {
-      _isLoading = false;
-    });
-  }
 
   final TextEditingController _searchController = TextEditingController();
   bool _showResults = false;
@@ -208,6 +265,10 @@ class _InicioState extends State<Inicio> {
     _checkLogin(context);
     _getServicos();
     _getSponsored();
+    _getSponsoredT();
+    _getAllTransp();
+    _getSponsoredActivities();
+    _getSponsoredA();
     _getSponsoredAcom();
     listenForAgendamentos();
     _getUnreadNotificationsCount();
@@ -310,34 +371,55 @@ class _InicioState extends State<Inicio> {
                 ),
                 Column(
                   children: [
-                    Container(
-                      padding: EdgeInsets.only(left: 15, right: 2),
-                      width: MediaQuery.of(context).size.width * .7,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        borderRadius: BorderRadius.circular(70),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              switch (textoSearch) {
+                                case "Acomodações":
+                                  return PesquisarAcomodacao();
+                                case "Atividades":
+                                  return PesquisarActividades();
+                                case "Transportes":
+                                  return PesquisarTransporte();
+                                default:
+                                  return ChooseTypeSearch();
+                              }
+                            },
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.only(left: 15, right: 2),
+                        width: MediaQuery.of(context).size.width * .7,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          borderRadius: BorderRadius.circular(70),
+                        ),
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Encontre ${textoSearch}',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 14)),
+                              Container(
+                                  // padding:  EdgeInsets.only(left: 15, right: 5),
+                                  width: 40,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(60),
+                                    color: Colors.white,
+                                  ),
+                                  child: Center(
+                                    child: Icon(Icons.search,
+                                        size: 22, color: Colors.blueAccent),
+                                  )),
+                            ]),
                       ),
-                      child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Encontre ${textoSearch}',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 14)),
-                            Container(
-                                // padding:  EdgeInsets.only(left: 15, right: 5),
-                                width: 40,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(60),
-                                  color: Colors.white,
-                                ),
-                                child: Center(
-                                  child: Icon(Icons.search,
-                                      size: 22, color: Colors.blueAccent),
-                                )),
-                          ]),
                     ),
                     SizedBox(height: 10),
                     Row(
@@ -568,7 +650,6 @@ class _InicioState extends State<Inicio> {
                                     ),
 
                                     Container(
-
                                       width: MediaQuery.of(context).size.width *
                                           .65,
                                       child: Row(
@@ -578,7 +659,8 @@ class _InicioState extends State<Inicio> {
                                           Container(
                                             child: Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.spaceBetween,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 acomodacao.wifi
                                                     ? const Icon(
@@ -629,7 +711,6 @@ class _InicioState extends State<Inicio> {
                                               ],
                                             ),
                                           ),
-
                                           Container(
                                             child: Row(
                                               children: [
@@ -651,7 +732,6 @@ class _InicioState extends State<Inicio> {
                                               ],
                                             ),
                                           ),
-
                                         ],
                                       ),
                                     ),
@@ -915,6 +995,7 @@ class _InicioState extends State<Inicio> {
     );
   }
 
+/*
   Column _servisosLista() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1021,7 +1102,7 @@ class _InicioState extends State<Inicio> {
       ],
     );
   }
-
+*/
   Container _barraPesquisa() {
     return Container(
       margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
@@ -1160,6 +1241,380 @@ class _InicioState extends State<Inicio> {
     );
   }
 
+  Column _activitiesBuilder() {
+    return Column(
+      children: _isLoading
+          ? [
+              // Pré-carregamento
+              for (int i = 0; i < 5; i++) // Adapte o número conforme necessário
+                _buildPlaceholderItem(),
+            ]
+          : List.generate(TodasActividades.length, (index) {
+              final heroTagg = 'act_$index'; // Tag única para o Hero
+
+              return Column(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetalheActividades(
+                            actividade: TodasActividades[index],
+                            heroTag: heroTagg,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Hero(
+                      tag: "act_" + TodasActividades[index].img,
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                            bottom: 0, left: 20, right: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * .9,
+                              height: MediaQuery.of(context).size.height * .2,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                      color: Colors.blue.withOpacity(.3),
+                                      width: 1)),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: CachedNetworkImage(
+                                  imageUrl: TodasActividades[index].img,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  placeholder: (context, url) => Center(
+                                    child: SizedBox(
+                                      width:
+                                          30, // Tamanho do CircularProgressIndicator
+                                      height:
+                                          30, // Tamanho do CircularProgressIndicator
+                                      child: CircularProgressIndicator(
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Container(
+                              height: MediaQuery.of(context).size.height * .1,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(.04),
+                                // border: Border.all(color: Colors.blue.withOpacity(.3), width: 1),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          .85,
+                                      child: Text(
+                                        TodasActividades[index].actividade,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                          color: Colors.black,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.location_on_outlined,
+                                              color: Colors.grey[600],
+                                              size: 20.0,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              TodasActividades[index].local,
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 16,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                        Spacer(),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              TodasActividades[index].preco,
+                                              style: TextStyle(
+                                                color: Colors.grey[700],
+                                                fontSize: 20.0,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              "Kz ",
+                                              style: TextStyle(
+                                                fontSize: 12.0,
+                                                fontWeight: FontWeight.w400,
+                                                color: Colors.grey[700],
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                ],
+              );
+            }),
+    );
+  }
+
+  Column _transportesBuilder() {
+    return Column(
+      children: _isLoading
+          ? [
+              // Pré-carregamento
+              for (int i = 0; i < 5; i++) // Adapte o número conforme necessário
+                _buildPlaceholderItem(),
+            ]
+          : List.generate(TodosTransportes.length, (index) {
+              final heroTagg = 'traanssppp_$index'; // Tag única para o Hero
+
+              return Column(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetalhesTransportePage(
+                            transporte: TodosTransportes[index],
+                            heroTag: heroTagg,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Hero(
+                      tag: TodosTransportes[index].img,
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                            bottom: 0, top: 10, left: 20, right: 20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * .3,
+                              height: MediaQuery.of(context).size.height * .14,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                      color: Colors.white, width: 1)),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: CachedNetworkImage(
+                                  imageUrl: TodosTransportes[index].img,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  placeholder: (context, url) => Center(
+                                    child: SizedBox(
+                                      width:
+                                          30, // Tamanho do CircularProgressIndicator
+                                      height:
+                                          30, // Tamanho do CircularProgressIndicator
+                                      child: CircularProgressIndicator(
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Container(
+                                height:
+                                    MediaQuery.of(context).size.height * .15,
+                                // decoration: BoxDecoration(
+                                //   color: Colors.grey.withOpacity(.05),
+                                //   border: Border.all(color: Colors.blue.withOpacity(.3), width: 1),
+                                //   borderRadius: BorderRadius.circular(16),
+                                // ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        TodosTransportes[index].nome,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                          color: Colors.black,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.people_alt_outlined,
+                                                    color: Colors.grey[600],
+                                                    size: 14.0,
+                                                  ),
+                                                  const SizedBox(width: 4.0),
+                                                  Text(
+                                                    ' ${TodosTransportes[index].lugares} lugares ',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 2.0),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.location_on_outlined,
+                                                    color: Colors.grey[600],
+                                                    size: 14.0,
+                                                  ),
+                                                  const SizedBox(width: 5),
+                                                  Text(
+                                                    TodosTransportes[index]
+                                                        .local,
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons
+                                                        .arrow_downward_rounded,
+                                                    color: Colors.grey[600],
+                                                    size: 18.0,
+                                                  ),
+                                                  const SizedBox(width: 5),
+                                                  Container(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            .25,
+                                                    child: Text(
+                                                      TodosTransportes[index]
+                                                          .destino,
+                                                      style: TextStyle(
+                                                        color: Colors.grey[600],
+                                                        // fontSize: 15,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: 1),
+                                            ],
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                TodosTransportes[index].preco,
+                                                style: TextStyle(
+                                                  color: Colors.grey[700],
+                                                  fontSize: 20.0,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Text(
+                                                "Kz",
+                                                style: TextStyle(
+                                                  fontSize: 12.0,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.grey[700],
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                ],
+              );
+            }),
+    );
+  }
+
   PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -1189,6 +1644,11 @@ class _InicioState extends State<Inicio> {
     _getSponsored();
     _getSponsoredAcom();
     _getUnreadNotificationsCount();
+    _getSponsoredA();
+    _getAllTransp();
+    _getSponsoredT();
+    _getSponsoredActivities();
+    _getSponsoredA();
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userData = userProvider.user;
@@ -1352,12 +1812,287 @@ class _InicioState extends State<Inicio> {
               const SizedBox(
                 height: 20,
               ),
-
-              _acomPatrocinada()
+              textoTab == "Acomodações"
+                  ? _acomPatrocinada()
+                  : (textoTab == "Experiências"
+                      ? _activitiesBuilder()
+                      : (textoTab == "Transportes"
+                          ? _transportesBuilder()
+                          : Container())),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Column _acomPatrocinadaHead() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.user;
+
+    String storageBaseUrl =
+        'https://firebasestorage.googleapis.com/v0/b/kulolesaapp.appspot.com/o/';
+    String imagePath =
+        'perfil%2F${userData!.profilePic}?alt=media&token=0240187d-8b96-48e5-80de-f41a16d527fd';
+
+    String imageUrlProfile = userData!.profilePic;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              child: Text(
+                "Bem-vindo(a) ${userData!.fullName.split(" ")[0]}",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18.0,
+                  // fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.only(right: 20, top: 5),
+              child: Container(
+                height: 55,
+                width: 55,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(
+                        color: EstiloApp.secondaryColor, width: 3.0)),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Perfil()));
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: SizedBox.fromSize(
+                      size: const Size.fromRadius(100.0),
+                      child: Image.network(
+                        imageUrlProfile,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 20.0,
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height *
+              .25, // Defina a altura desejada para a lista horizontal
+          child: _isLoading
+              ? _buildPlaceholderItem()
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: sponsoredAcom.length,
+                  itemBuilder: (context, index) {
+                    final acomodacao = sponsoredAcom[index];
+                    final heroTag =
+                        'acomodacaoHead_$index'; // Tag única para o Hero
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetalhesAcomodacaoPage(
+                              acomodacao: acomodacao,
+                              heroTag: heroTag,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: MediaQuery.of(context).size.width *
+                            .95, // Defina a largura desejada para cada item
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 20),
+                        decoration: BoxDecoration(
+                          // color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          // boxShadow: [
+                          //   BoxShadow(
+                          //     color: const Color(0xff1D1617).withOpacity(.07),
+                          //     blurRadius: 40,
+                          //     offset: const Offset(0, 10),
+                          //     spreadRadius: 0,
+                          //   ),
+                          // ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * .9,
+                              height: MediaQuery.of(context).size.height * .3,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Hero(
+                                tag: heroTag,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: SizedBox.fromSize(
+                                    size: const Size.fromRadius(100.0),
+                                    child: CachedNetworkImage(
+                                      imageUrl: acomodacao.img,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // Padding(
+                            //   padding: const EdgeInsets.only(
+                            //       top: 8.0, bottom: 3, left: 10),
+                            //   child: Column(
+                            //     crossAxisAlignment: CrossAxisAlignment.start,
+                            //     children: [
+                            //       Container(
+                            //         width: MediaQuery.of(context).size.width *
+                            //             .45,
+                            //         child: Text(
+                            //           acomodacao.acom,
+                            //           style: const TextStyle(
+                            //             fontSize: 18.0,
+                            //             fontWeight: FontWeight.bold,
+                            //             color: EstiloApp.ccolor,
+                            //           ),
+                            //           overflow: TextOverflow.ellipsis,
+                            //           maxLines: 1,
+                            //         ),
+                            //       ),
+                            //       Row(
+                            //         mainAxisAlignment: MainAxisAlignment.start,
+                            //         children: [
+                            //           const Icon(
+                            //             Icons.location_on_outlined,
+                            //             color: EstiloApp.ccolor,
+                            //             size: 13,
+                            //           ),
+                            //           Container(
+                            //
+                            //               width: MediaQuery.of(context).size.width *
+                            //                   .3,
+                            //               child: Text(acomodacao.local, overflow: TextOverflow.ellipsis,)
+                            //           ),
+                            //         ],
+                            //       ),
+                            //       const SizedBox(
+                            //         height: 0,
+                            //       ),
+                            //       Row(
+                            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            //         children: [
+                            //           acomodacao.wifi
+                            //               ? const Icon(
+                            //             Icons.wifi,
+                            //             size: 13,
+                            //             color: EstiloApp.secondaryColor,
+                            //           )
+                            //               : const Icon(
+                            //             Icons.wifi_off,
+                            //             size: 13,
+                            //             color: Colors.red,
+                            //           ),
+                            //           const SizedBox(
+                            //             width: 6,
+                            //           ),
+                            //           acomodacao.cama
+                            //               ? const Icon(
+                            //             Icons.bed_outlined,
+                            //             size: 13,
+                            //             color: EstiloApp.secondaryColor,
+                            //           )
+                            //               : const Text(''),
+                            //           const SizedBox(
+                            //             width: 6,
+                            //           ),
+                            //           acomodacao.chuveiro
+                            //               ? const Icon(
+                            //             Icons.shower_outlined,
+                            //             size: 15,
+                            //             color: EstiloApp.secondaryColor,
+                            //           )
+                            //               : const SizedBox(),
+                            //           const SizedBox(
+                            //             width: 6,
+                            //           ),
+                            //           acomodacao.sinal
+                            //               ? const Icon(
+                            //             Icons.speaker_phone_rounded,
+                            //             size: 15,
+                            //             color: EstiloApp.secondaryColor,
+                            //           )
+                            //               : const SizedBox(),
+                            //         ],
+                            //       ),
+                            //       SizedBox(
+                            //         width: MediaQuery.of(context).size.width * .42,
+                            //         child: Row(
+                            //           children: [
+                            //             Row(
+                            //               children: [
+                            //                 const Icon(Icons.star_border_purple500,
+                            //                     color: EstiloApp.tcolor, size: 15),
+                            //                 Text(
+                            //                   acomodacao.avaliacao,
+                            //                   style: const TextStyle(
+                            //                       fontSize: 14.0,
+                            //                       fontWeight: FontWeight.bold,
+                            //                       color: Colors.black),
+                            //                 ),
+                            //               ],
+                            //             ),
+                            //
+                            //             const Spacer(),
+                            //
+                            //             Row(
+                            //               children: [
+                            //                 const Text(
+                            //                   "AOA",
+                            //                   style: TextStyle(
+                            //                       fontSize: 8,
+                            //                       fontWeight: FontWeight.w500),
+                            //                 ),
+                            //                 const SizedBox(
+                            //                   width: 2,
+                            //                 ),
+                            //                 Text(
+                            //                   acomodacao.preco,
+                            //                   style: const TextStyle(
+                            //                     fontSize: 15.5,
+                            //                     fontWeight: FontWeight.w600,
+                            //                     color: Colors.black,
+                            //                   ),
+                            //                 ),
+                            //               ],
+                            //             )
+                            //           ],
+                            //         ),
+                            //       )
+                            //     ],
+                            //   ),
+                            // )
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }

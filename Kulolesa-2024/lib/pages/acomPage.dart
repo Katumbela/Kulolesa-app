@@ -25,10 +25,14 @@ class PaginaAcomodacao extends StatefulWidget {
 
 class _PaginaAcomodacaoState extends State<PaginaAcomodacao> {
 
-
-  List<PatrocinadosAcomModel> patrocinadosAcom = [];
-
   List<PatrocinadosAcomModel> sponsoredAcom = [];
+
+  void _getSponsoredAcom() async {
+    patrocinadosAcom = await PatrocinadosAcomModel.getSponsoredAcom();
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
 
   String? selectedCountry;
@@ -38,13 +42,9 @@ class _PaginaAcomodacaoState extends State<PaginaAcomodacao> {
   bool _isLoading = true;
 
 
+  List<PatrocinadosAcomModel> patrocinadosAcom = [];
 
-  void _getSponsoredAcom() async {
-    patrocinadosAcom = await PatrocinadosAcomModel.getSponsoredAcom();
-    setState(() {
-      _isLoading = false;
-    });
-  }
+
 
 
 
@@ -763,4 +763,6 @@ class _PaginaAcomodacaoState extends State<PaginaAcomodacao> {
       ),
     );
   }
+
+
 }

@@ -459,9 +459,7 @@ class _CadastroPageState extends State<CadastroPage> {
                     horizontal: MediaQuery.of(context).size.width * 0.25),
                 child: ElevatedButton(
                   onPressed: () => addDataToFirestore(context),
-                  style: ElevatedButton.styleFrom(
-                    primary:
-                        Colors.blue[700], // Define a cor de fundo azul[700]
+                  style: ElevatedButton.styleFrom( backgroundColor: Colors.blue[700], // Define a cor de fundo azul[700]
                   ),
                   child: _isLoading
                       ? SizedBox(

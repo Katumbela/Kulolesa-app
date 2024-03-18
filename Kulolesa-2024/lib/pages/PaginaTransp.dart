@@ -17,9 +17,13 @@ import '../widgets/saudacao.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 
-
 class PaginaTransportes extends StatefulWidget {
+  final String onde;
+  final String data;
+  final String partida;
 
+  PaginaTransportes(
+      {required this.onde, required this.data, required this.partida});
 
   @override
   State<PaginaTransportes> createState() => _PaginaTransportesState();
@@ -28,7 +32,6 @@ class PaginaTransportes extends StatefulWidget {
 class _PaginaTransportesState extends State<PaginaTransportes> {
   List<TodosTranspModel> patrocinadosTransp = [];
   List<TodosTranspModel> TodosTransportes = [];
-
 
   void _getSponsoredT() async {
     List<TodosTranspModel> allTransportes =
@@ -39,6 +42,16 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
         allTransportes.where((transp) => transp.sponsor).toList();
   }
 
+  void _getAllTransp() async {
+    todosTranspOriginal =
+        await TodosTranspModel.getAllTransp(); // Preencha a lista original
+    TodosTransportes =
+        todosTranspOriginal; // Inicialize a lista de resultados com os dados originais
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   final TextEditingController _searchController = TextEditingController();
   bool _showResults = false;
   bool _showFilter = false;
@@ -47,49 +60,51 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
 
   bool _isLoading = true;
 
-  final _startSearchFieldController = TextEditingController();
-  final _endSearchFieldController = TextEditingController();
+  late final _startSearchFieldController =
+      TextEditingController(text: widget.partida);
+  late final _endSearchFieldController =
+      TextEditingController(text: widget.onde);
   final controller = TextEditingController();
 
+/*
+  late TextEditingController _startSearchFieldController;
+  late TextEditingController _endSearchFieldController;
+  late TextEditingController _controller;
+*/
   bool Nenhum = false;
   TextEditingController _dateController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
 
-  List<TodosTranspModel> todosTranspOriginal = []; // Mantenha uma cópia dos dados originais
-
-  void _getAllTransp() async {
-    todosTranspOriginal = await TodosTranspModel.getAllTransp(); // Preencha a lista original
-    TodosTransportes = todosTranspOriginal; // Inicialize a lista de resultados com os dados originais
-    setState(() {
-      _isLoading = false;
-    });
-  }
+  List<TodosTranspModel> todosTranspOriginal =
+      []; // Mantenha uma cópia dos dados originais
 
   void _filterResults() {
-    final startLocation = _startSearchFieldController.text.toLowerCase();
-    final endLocation = _endSearchFieldController.text.toLowerCase();
-    final selectedDate = _dateController.text ?? "/"; // Obtenha a data selecionada
+    final startLocation = widget.partida.toLowerCase();
+    final endLocation = widget.onde.toLowerCase();
+    final selectedDate = widget.data ?? "/"; // Obtenha a data selecionada
 
     // Aplicar filtros aos resultados
-    List<TodosTranspModel> filteredResults = todosTranspOriginal.where((transp) {
+    List<TodosTranspModel> filteredResults =
+        todosTranspOriginal.where((transp) {
       final transpStartLocation = transp.local.toLowerCase();
       final transpEndLocation = transp.destino.toLowerCase();
-      final transpDate = transp.dataPartida; // Substitua com o campo de data apropriado
+      final transpDate =
+          transp.dataPartida; // Substitua com o campo de data apropriado
 
       // Verifique se o ponto de partida e o ponto de chegada contêm os termos de pesquisa
       // e a data é a mesma que a selecionada (ou qualquer outra lógica de data que você precise).
       return transpStartLocation.contains(startLocation) &&
-          transpEndLocation.contains(endLocation) && transpDate.contains(selectedDate);
+          transpEndLocation.contains(endLocation) &&
+          transpDate.contains(selectedDate);
     }).toList();
 
     setState(() {
       TodosTransportes = filteredResults; // Atualize a lista de resultados
     });
 
-    if(TodosTransportes.isEmpty) {
+    if (TodosTransportes.isEmpty) {
       Nenhum = true;
-    }
-    else {
+    } else {
       Nenhum = false;
     }
     print(TodosTransportes);
@@ -105,8 +120,8 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
     // TODO: implement initState
     super.initState();
     _getAllTransp();
+    _filterResults();
   }
-
 
   Future<void> _handleRefresh() async {
     // Aguarde um período simulado para dar a sensação de atualização (você pode remover isso)
@@ -120,19 +135,17 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     _getSponsoredT();
-
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userData = userProvider.user;
 
     return Scaffold(
       appBar: CustomAppBar(titulo: "Encontre Transportes"),
       body: RefreshIndicator(
-        onRefresh: _handleRefresh, // Função para executar quando o usuário atualizar
+        onRefresh:
+            _handleRefresh, // Função para executar quando o usuário atualizar
         child: ListView(
           // crossAxisAlignment: CrossAxisAlignment.start,
           // scrollDirection: Axis.vertical,
@@ -181,7 +194,7 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                             child: SizedBox(
                               width: 15, // Tamanho do CircularProgressIndicator
                               height:
-                              15, // Tamanho do CircularProgressIndicator
+                                  15, // Tamanho do CircularProgressIndicator
                               child: CircularProgressIndicator(
                                 color: Colors.blue,
                               ),
@@ -207,231 +220,7 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
             const SizedBox(
               height: 15,
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                "Transportes em destaque",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-
-            Container(
-              height: MediaQuery.of(context).size.height * .25,
-              child: _isLoading
-                  ? SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          // Pré-carregamento
-                          for (int i = 0;
-                              i < 5;
-                              i++) // Adapte o número conforme necessário
-                            _buildPlaceholderItemHead(),
-                        ],
-                      ),
-                    )
-                  : ListView.separated(
-                      itemCount: patrocinadosTransp.length,
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(left: 20, right: 20),
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 30.0),
-                      itemBuilder: (context, index) {
-                        final heroTagg = "traspppttt_$index";
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DetalhesTransportePage(
-                                  transporte: patrocinadosTransp[index],
-                                  heroTag: heroTagg,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Hero(
-                            tag: patrocinadosTransp[index].img,
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * .4,
-                              decoration: BoxDecoration(
-                                color: patrocinadosTransp[index]
-                                    .boxColor
-                                    .withOpacity(.3),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Stack(
-                                children: <Widget>[
-                                  Container(
-                                    height:
-                                        MediaQuery.of(context).size.height * .4,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(15),
-                                      child: SizedBox.fromSize(
-                                        size: Size.fromRadius(
-                                            MediaQuery.of(context).size.height *
-                                                .4),
-                                        child: CachedNetworkImage(
-                                          imageUrl: patrocinadosTransp[index].img,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) => Center(
-                                            child: SizedBox(
-                                              width:
-                                                  30, // Tamanho do CircularProgressIndicator
-                                              height:
-                                                  30, // Tamanho do CircularProgressIndicator
-                                              child: CircularProgressIndicator(
-                                                color: Colors.blue,
-                                              ),
-                                            ),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  // Positioned(
-                                  //   bottom: 0,
-                                  //   child: Container(
-                                  //     width:
-                                  //         MediaQuery.of(context).size.width * .4,
-                                  //     decoration: BoxDecoration(
-                                  //       color: EstiloApp.secondaryColor
-                                  //           .withOpacity(.65),
-                                  //       borderRadius: const BorderRadius.only(
-                                  //         bottomLeft: Radius.circular(15),
-                                  //         bottomRight: Radius.circular(15),
-                                  //       ),
-                                  //     ),
-                                  //     child: Padding(
-                                  //       padding: const EdgeInsets.symmetric(
-                                  //           vertical: 8, horizontal: 5),
-                                  //       child: Column(
-                                  //         crossAxisAlignment:
-                                  //             CrossAxisAlignment.start,
-                                  //         children: [
-                                  //           Text(
-                                  //             patrocinadosTransp[index].nome,
-                                  //             style: const TextStyle(
-                                  //               fontWeight: FontWeight.bold,
-                                  //               fontSize: 15,
-                                  //               color: Colors.white,
-                                  //             ),
-                                  //             overflow: TextOverflow.ellipsis,
-                                  //           ),
-                                  //           Row(
-                                  //             crossAxisAlignment:
-                                  //                 CrossAxisAlignment.end,
-                                  //             mainAxisAlignment:
-                                  //                 MainAxisAlignment.spaceBetween,
-                                  //             children: [
-                                  //               Column(
-                                  //                 crossAxisAlignment:
-                                  //                     CrossAxisAlignment.start,
-                                  //                 children: [
-                                  //                   Row(
-                                  //                     children: [
-                                  //                       const Icon(
-                                  //                         Icons
-                                  //                             .location_on_outlined,
-                                  //                         color: Colors.white,
-                                  //                         size: 15.0,
-                                  //                       ),
-                                  //                       Text(
-                                  //                         patrocinadosTransp[
-                                  //                                 index]
-                                  //                             .local,
-                                  //                         style: const TextStyle(
-                                  //                           color: Colors.white,
-                                  //                           fontSize: 10,
-                                  //                         ),
-                                  //                         overflow: TextOverflow
-                                  //                             .ellipsis,
-                                  //                       ),
-                                  //                     ],
-                                  //                   ),
-                                  //                   const SizedBox(height: 1.0),
-                                  //                   Row(
-                                  //                     children: <Widget>[
-                                  //                       const Icon(
-                                  //                         Icons
-                                  //                             .arrow_downward_rounded,
-                                  //                         color: Colors.white,
-                                  //                         size: 16.0,
-                                  //                       ),
-                                  //                       Text(
-                                  //                         patrocinadosTransp[
-                                  //                                 index]
-                                  //                             .destino,
-                                  //                         style: const TextStyle(
-                                  //                           color: Colors.white,
-                                  //                           fontSize: 10.0,
-                                  //                         ),
-                                  //                         overflow: TextOverflow
-                                  //                             .ellipsis,
-                                  //                       ),
-                                  //                     ],
-                                  //                   ),
-                                  //                 ],
-                                  //               ),
-                                  //               Row(
-                                  //                 crossAxisAlignment:
-                                  //                     CrossAxisAlignment.end,
-                                  //                 children: [
-                                  //                   Text(
-                                  //                     patrocinadosTransp[index]
-                                  //                         .preco,
-                                  //                     style: const TextStyle(
-                                  //                       color: Colors.white,
-                                  //                       // fontSize: 18.0,
-                                  //                       fontWeight:
-                                  //                           FontWeight.bold,
-                                  //                     ),
-                                  //                     overflow:
-                                  //                         TextOverflow.ellipsis,
-                                  //                   ),
-                                  //                   const Text(
-                                  //                     "Kz",
-                                  //                     style: TextStyle(
-                                  //                       fontSize: 10.0,
-                                  //                       fontWeight:
-                                  //                           FontWeight.w400,
-                                  //                       color: Colors.white,
-                                  //                     ),
-                                  //                     overflow:
-                                  //                         TextOverflow.ellipsis,
-                                  //                   ),
-                                  //                 ],
-                                  //               ),
-                                  //             ],
-                                  //           ),
-                                  //         ],
-                                  //       ),
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
+          
             Column(
               children: _isLoading
                   ? [
@@ -468,15 +257,16 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
-                                      width:
-                                          MediaQuery.of(context).size.width * .3,
-                                      height: MediaQuery.of(context).size.height *
-                                          .14,
+                                      width: MediaQuery.of(context).size.width *
+                                          .3,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              .14,
                                       decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(15),
+                                          borderRadius:
+                                              BorderRadius.circular(15),
                                           border: Border.all(
-                                              color: Colors.white,
-                                              width: 1)),
+                                              color: Colors.white, width: 1)),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(15),
                                         child: CachedNetworkImage(
@@ -537,7 +327,8 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                                 children: [
                                                   Column(
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.end,
                                                     children: [
@@ -546,8 +337,8 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                                           Icon(
                                                             Icons
                                                                 .people_alt_outlined,
-                                                            color:
-                                                                Colors.grey[600],
+                                                            color: Colors
+                                                                .grey[600],
                                                             size: 14.0,
                                                           ),
                                                           const SizedBox(
@@ -556,20 +347,23 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                                             ' ${TodosTransportes[index].lugares} lugares ',
                                                             style: TextStyle(
                                                               fontWeight:
-                                                                  FontWeight.bold,
-                                                              color: Colors.grey[600],
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: Colors
+                                                                  .grey[600],
                                                             ),
                                                           ),
                                                         ],
                                                       ),
-                                                      const SizedBox(height: 2.0),
+                                                      const SizedBox(
+                                                          height: 2.0),
                                                       Row(
                                                         children: [
                                                           Icon(
                                                             Icons
                                                                 .location_on_outlined,
-                                                            color:
-                                                                Colors.grey[600],
+                                                            color: Colors
+                                                                .grey[600],
                                                             size: 14.0,
                                                           ),
                                                           const SizedBox(
@@ -582,8 +376,9 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                                               color: Colors
                                                                   .grey[600],
                                                             ),
-                                                            overflow: TextOverflow
-                                                                .ellipsis,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
                                                           ),
                                                         ],
                                                       ),
@@ -593,14 +388,18 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                                           Icon(
                                                             Icons
                                                                 .arrow_downward_rounded,
-                                                            color:
-                                                                Colors.grey[600],
+                                                            color: Colors
+                                                                .grey[600],
                                                             size: 18.0,
                                                           ),
                                                           const SizedBox(
                                                               width: 5),
                                                           Container(
-                                                            width: MediaQuery.of(context).size.width * .25,
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                .25,
                                                             child: Text(
                                                               TodosTransportes[
                                                                       index]
@@ -610,8 +409,9 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                                                     .grey[600],
                                                                 // fontSize: 15,
                                                               ),
-                                                              overflow: TextOverflow
-                                                                  .ellipsis,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
                                                             ),
                                                           ),
                                                         ],
@@ -629,13 +429,14 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                                         TodosTransportes[index]
                                                             .preco,
                                                         style: TextStyle(
-                                                          color: Colors.grey[700],
+                                                          color:
+                                                              Colors.grey[700],
                                                           fontSize: 20.0,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                         ),
-                                                        overflow:
-                                                            TextOverflow.ellipsis,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
                                                       ),
                                                       Text(
                                                         "Kz",
@@ -643,10 +444,11 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
                                                           fontSize: 12.0,
                                                           fontWeight:
                                                               FontWeight.w400,
-                                                          color: Colors.grey[700],
+                                                          color:
+                                                              Colors.grey[700],
                                                         ),
-                                                        overflow:
-                                                            TextOverflow.ellipsis,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
                                                       ),
                                                     ],
                                                   ),
@@ -670,24 +472,27 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
             SizedBox(
               height: 40.0,
             ),
-
-            Nenhum && TodosTransportes.length <= 0 ? Container(
-              padding: EdgeInsets.only(bottom: 70, top: 5, left: 35, right: 35),
-              alignment: Alignment.center,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Lottie.asset("assets/notfound2.json", height: 140, width: 140),
-                          Text("Não foi encontrado nenhum transporte com este trajeto", textAlign: TextAlign.center, style: TextStyle(
-                            fontSize: 14,
-                            // fontWeight: FontWeight.w700,
-                          )),
-                        ],
-                      ),
-
-            )
-             : SizedBox.shrink(),
-
+            Nenhum && TodosTransportes.length <= 0
+                ? Container(
+                    padding: EdgeInsets.only(
+                        bottom: 70, top: 5, left: 35, right: 35),
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset("assets/notfound2.json",
+                            height: 140, width: 140),
+                        Text(
+                            "Não foi encontrado nenhum transporte com este trajeto",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              // fontWeight: FontWeight.w700,
+                            )),
+                      ],
+                    ),
+                  )
+                : SizedBox.shrink(),
           ],
         ),
       ),
@@ -695,166 +500,169 @@ class _PaginaTransportesState extends State<PaginaTransportes> {
   }
 
   Row _barraPesquisa() {
-    return  Row(
-            children: [
+    return Row(
+      children: [
+        // Campo de Ponto de Partida
 
-              // Campo de Ponto de Partida
-
-              Expanded(
-                child: SizedBox(
-                  height: 40,
-                  // padding: EdgeInsets.only(left: 0.0, right: 0.0), // Define o padding apenas à esquerda
-                  child: TextField(
-                    controller: _startSearchFieldController,
-                    decoration: InputDecoration(
-                      labelText: 'Partida',
-                      contentPadding: EdgeInsets.only(top: 5, left: 10),
-                      // hintStyle: TextStyle(fontSize: 12),
-                      prefixIcon: Icon(Icons.location_on, size: 20, color: Colors.blueAccent),
-                      prefixIconConstraints: BoxConstraints(
-                        minWidth: 30, // Largura mínima do ícone
-                        minHeight: 15, // Altura mínima do ícone
-                      ),
-                      // Remova a borda do lado direito
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20.0),
-                          bottomLeft: Radius.circular(20.0),
-                        ),
-                        borderSide: BorderSide.none, // Remove a borda
-                      ),
-                      // Adicione uma borda personalizada ao lado esquerdo
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20.0),
-                          bottomLeft: Radius.circular(20.0),
-                        ),
-                        borderSide: BorderSide(
-                          color: Colors.blue,
-                          width: 1.0,
-                        ),
-                      ),
-                    ),
+        Expanded(
+          child: SizedBox(
+            height: 40,
+            // padding: EdgeInsets.only(left: 0.0, right: 0.0), // Define o padding apenas à esquerda
+            child: TextField(
+              controller: _startSearchFieldController,
+              decoration: InputDecoration(
+                labelText: 'Partida',
+                contentPadding: EdgeInsets.only(top: 5, left: 10),
+                // hintStyle: TextStyle(fontSize: 12),
+                prefixIcon:
+                    Icon(Icons.location_on, size: 20, color: Colors.blueAccent),
+                prefixIconConstraints: BoxConstraints(
+                  minWidth: 30, // Largura mínima do ícone
+                  minHeight: 15, // Altura mínima do ícone
+                ),
+                // Remova a borda do lado direito
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    bottomLeft: Radius.circular(20.0),
+                  ),
+                  borderSide: BorderSide.none, // Remove a borda
+                ),
+                // Adicione uma borda personalizada ao lado esquerdo
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    bottomLeft: Radius.circular(20.0),
+                  ),
+                  borderSide: BorderSide(
+                    color: Colors.blue,
+                    width: 1.0,
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
 
-              // Campo de Ponto de Chegada
-              Expanded(
-                child: SizedBox(
-                  height: 40,
-                  child: TextField(
-                    controller: _endSearchFieldController,
-                    decoration: InputDecoration(
-                      labelText: 'Chegada',
-                      contentPadding: EdgeInsets.only(top: 5, left: 10),
-                      prefixIcon: Icon(Icons.location_on, size: 20, color: Colors.blueAccent),
-                      prefixIconConstraints: BoxConstraints(
-                        minWidth: 10, // Largura mínima do ícone
-                        minHeight: 15, // Altura mínima do ícone
-                      ),
-                      // Remova a borda do lado direito
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20.0),
-                          bottomLeft: Radius.circular(20.0),
-                        ),
-                        borderSide: BorderSide.none, // Remove a borda
-                      ),
-                      // Adicione uma borda personalizada ao lado esquerdo
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0.0),
-                          bottomLeft: Radius.circular(0.0),
-                        ),
-                        borderSide: BorderSide(
-                          color: Colors.blue,
-                          width: 1.0,
-                        ),
-                      ),
-                    ),
+        // Campo de Ponto de Chegada
+        Expanded(
+          child: SizedBox(
+            height: 40,
+            child: TextField(
+              controller: _endSearchFieldController,
+              decoration: InputDecoration(
+                labelText: 'Chegada',
+                contentPadding: EdgeInsets.only(top: 5, left: 10),
+                prefixIcon:
+                    Icon(Icons.location_on, size: 20, color: Colors.blueAccent),
+                prefixIconConstraints: BoxConstraints(
+                  minWidth: 10, // Largura mínima do ícone
+                  minHeight: 15, // Altura mínima do ícone
+                ),
+                // Remova a borda do lado direito
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    bottomLeft: Radius.circular(20.0),
+                  ),
+                  borderSide: BorderSide.none, // Remove a borda
+                ),
+                // Adicione uma borda personalizada ao lado esquerdo
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(0.0),
+                    bottomLeft: Radius.circular(0.0),
+                  ),
+                  borderSide: BorderSide(
+                    color: Colors.blue,
+                    width: 1.0,
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
 
-              // Campo de Data
+        // Campo de Data
 
-              Expanded(
-                child: SizedBox(
-                  height: 40,
-                  child: TextField(
-                    readOnly: true, // Torna o campo de texto somente leitura para evitar entrada direta
-                    controller: _dateController,
-                    onTap: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate,
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2025, 12, 31),
-                        // locale: Locale('pt'), // Set the locale to Portuguese
-                      );
+        Expanded(
+          child: SizedBox(
+            height: 40,
+            child: TextField(
+              readOnly:
+                  true, // Torna o campo de texto somente leitura para evitar entrada direta
+              controller: _dateController,
+              onTap: () async {
+                final DateTime? picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2025, 12, 31),
+                  // locale: Locale('pt'), // Set the locale to Portuguese
+                );
 
-                      if (picked != null && picked != _selectedDate) {
-                        setState(() {
-                          _selectedDate = picked;
-                          _dateController.text = DateFormat('dd/MM/yyyy').format(picked);
-                        });
-                      }
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Data',
-                      prefixIcon: Icon(Icons.calendar_today, size: 15, color: Colors.blueAccent),
-                      prefixIconConstraints: BoxConstraints(
-                        minWidth: 30, // Largura mínima do ícone
-                        minHeight: 15, // Altura mínima do ícone
-                      ),
+                if (picked != null && picked != _selectedDate) {
+                  setState(() {
+                    _selectedDate = picked;
+                    _dateController.text =
+                        DateFormat('dd/MM/yyyy').format(picked);
+                  });
+                }
+              },
+              decoration: InputDecoration(
+                labelText: widget.data,
+                prefixIcon: Icon(Icons.calendar_today,
+                    size: 15, color: Colors.blueAccent),
+                prefixIconConstraints: BoxConstraints(
+                  minWidth: 30, // Largura mínima do ícone
+                  minHeight: 15, // Altura mínima do ícone
+                ),
 
-                      contentPadding: EdgeInsets.only(top: 11),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20.0),
-                          bottomLeft: Radius.circular(20.0),
-                        ),
-                        borderSide: BorderSide.none, // Remove a borda
-                      ),
-                      // Adicione uma borda personalizada ao lado esquerdo
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0.0),
-                          bottomLeft: Radius.circular(0.0),
-                        ),
-                        borderSide: BorderSide(
-                          color: Colors.blue,
-                          width: 1.0,
-                        ),
-                      ),
-                    ),
+                contentPadding: EdgeInsets.only(top: 11),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    bottomLeft: Radius.circular(20.0),
+                  ),
+                  borderSide: BorderSide.none, // Remove a borda
+                ),
+                // Adicione uma borda personalizada ao lado esquerdo
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(0.0),
+                    bottomLeft: Radius.circular(0.0),
+                  ),
+                  borderSide: BorderSide(
+                    color: Colors.blue,
+                    width: 1.0,
                   ),
                 ),
               ),
-              // Botão de Filtrar/Buscar
-               InkWell(
-                  onTap: () {
-                    _filterResults(); // Implemente esta função para aplicar os filtros
-                  },
-                  child: SizedBox(
-                    height: 40,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(20),
-                          bottomRight: Radius.circular(20),
-                        )
-                      ),
-                        child: Icon(Icons.search, color: Colors.white),
-                    ),
-                  ),
-                ),
-            ],
-          );
-       }
+            ),
+          ),
+        ),
+        // Botão de Filtrar/Buscar
+        InkWell(
+          onTap: () {
+            _filterResults(); // Implemente esta função para aplicar os filtros
+          },
+          child: SizedBox(
+            height: 40,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  )),
+              child: Icon(Icons.search, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildPlaceholderItem() {
     return Container(

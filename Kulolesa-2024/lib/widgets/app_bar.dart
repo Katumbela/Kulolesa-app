@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-   String titulo;
+  String titulo;
 
   CustomAppBar({super.key, required this.titulo});
 
@@ -11,17 +11,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.pop(context); // Voltar para a tela anterior
-        },
-      ),
       centerTitle: true,
-      title: Text(titulo, style: const TextStyle(
-        fontWeight: FontWeight.bold,
-
-      ),),
+      automaticallyImplyLeading: false,
+      title: Text(
+        titulo,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

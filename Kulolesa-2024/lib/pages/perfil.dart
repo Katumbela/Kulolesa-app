@@ -33,7 +33,6 @@ class Perfil extends StatefulWidget {
 }
 
 class _PerfilState extends State<Perfil> {
-
   Future<void> _logout(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     userProvider.setUser(UserData(
@@ -95,8 +94,12 @@ class _PerfilState extends State<Perfil> {
 
         // Fazer upload da imagem para o Firebase Storage
         if (userData != null) {
-          final storageRef = FirebaseStorage.instance.ref().child('perfil').child(userData.uniqueID);
-          final UploadTask uploadTask = storageRef.putFile(File(pickedImage.path));
+          final storageRef = FirebaseStorage.instance
+              .ref()
+              .child('perfil')
+              .child(userData.uniqueID);
+          final UploadTask uploadTask =
+              storageRef.putFile(File(pickedImage.path));
           final TaskSnapshot uploadSnapshot = await uploadTask;
 
           // Obter a URL de download da imagem
@@ -119,7 +122,8 @@ class _PerfilState extends State<Perfil> {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: Text("Foto de perfil atualizada"),
-                content: Text("Sua foto de perfil está sendo atualizada  com sucesso."),
+                content: Text(
+                    "Sua foto de perfil está sendo atualizada  com sucesso."),
                 actions: [
                   TextButton(
                     onPressed: () {
@@ -179,15 +183,17 @@ class _PerfilState extends State<Perfil> {
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Center(
                               child: SizedBox(
-                                width: 20, // Tamanho do CircularProgressIndicator
-                                height: 20, // Tamanho do CircularProgressIndicator
+                                width:
+                                    20, // Tamanho do CircularProgressIndicator
+                                height:
+                                    20, // Tamanho do CircularProgressIndicator
                                 child: CircularProgressIndicator(
                                   color: Colors.white,
                                 ),
                               ),
                             ),
-                            errorWidget: (context, url, error) => Icon(Icons.error),
-
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
                           ),
                         ),
                       ),
@@ -334,70 +340,78 @@ class _PerfilState extends State<Perfil> {
                         const SizedBox(
                           height: 15,
                         ),
-                        userData!.accountType != "Usuario" ?
-
-                        Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.grey.withOpacity(.2),
-                                        blurRadius: 40,
-                                        spreadRadius: 0)
-                                  ]),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    PageTransition(
-                                      type: PageTransitionType.rightToLeft,
-                                      duration: const Duration(milliseconds: 200),
-                                      child: PaginasMeusServicos(),
-                                    ),
-                                  );
-                                },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        SizedBox(
-                                          height: 30,
-                                          width: 30,
-                                          child: Image.asset("assets/house.png"),
-                                        ),
-                                        const SizedBox(width: 5),
-                                        const Text(
-                                          "Meus serviços",
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w500,
+                        userData!.accountType != "Usuario"
+                            ? Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color:
+                                                  Colors.grey.withOpacity(.2),
+                                              blurRadius: 40,
+                                              spreadRadius: 0)
+                                        ]),
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          PageTransition(
+                                            type:
+                                                PageTransitionType.rightToLeft,
+                                            duration: const Duration(
+                                                milliseconds: 200),
+                                            child: PaginasMeusServicos(),
                                           ),
-                                        ),
-                                      ],
+                                        );
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                height: 30,
+                                                width: 30,
+                                                child: Image.asset(
+                                                    "assets/house.png"),
+                                              ),
+                                              const SizedBox(width: 5),
+                                              const Text(
+                                                "Meus serviços",
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 16,
+                                            width: 16,
+                                            child:
+                                                Image.asset("assets/right.png"),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    SizedBox(
-                                      height: 16,
-                                      width: 16,
-                                      child: Image.asset("assets/right.png"),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                          ],
-                        ) : SizedBox.shrink(),
-
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                ],
+                              )
+                            : SizedBox.shrink(),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -454,7 +468,6 @@ class _PerfilState extends State<Perfil> {
                         const SizedBox(
                           height: 15,
                         ),
-
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -514,11 +527,9 @@ class _PerfilState extends State<Perfil> {
                             ),
                           ),
                         ),
-
                         const SizedBox(
                           height: 15,
                         ),
-
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -550,13 +561,11 @@ class _PerfilState extends State<Perfil> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-
                                     SizedBox(
                                       height: 30,
                                       width: 30,
                                       child: Image.asset("assets/person.png"),
                                     ),
-
                                     const SizedBox(width: 5),
                                     Container(
                                       width: MediaQuery.of(context).size.width *

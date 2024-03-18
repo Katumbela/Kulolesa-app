@@ -1,0 +1,1 @@
+ C:\\Users\\joao.katombela\\Documents\\GitHub\\Kulolesa-app\\Kulolesa-2024\\.dart_tool\\flutter_build\\6e56b9a0c6f01903c95e20ee12589e84\\native_assets.yaml: 
