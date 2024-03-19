@@ -267,6 +267,7 @@ class _InicioState extends State<Inicio> {
     _getSponsored();
     _getSponsoredT();
     _getAllTransp();
+    _getAllActivities();
     _getSponsoredActivities();
     _getSponsoredA();
     _getSponsoredAcom();
@@ -1649,6 +1650,7 @@ class _InicioState extends State<Inicio> {
     _getSponsoredT();
     _getSponsoredActivities();
     _getSponsoredA();
+    _getAllActivities();
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userData = userProvider.user;
@@ -2118,34 +2120,34 @@ class _BottomNavBarState extends State<BottomNavBar> {
       backgroundColor: Colors.black,
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.blue[800],
+        selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
         selectedLabelStyle: TextStyle(
-          fontSize: 10,
+          fontSize: 20,
         ),
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: '•',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Favoritos',
+            label: '•',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
-            label: 'Notificações',
+            label: '•',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Perfil',
+            label: '•',
           ),
         ],
       ),

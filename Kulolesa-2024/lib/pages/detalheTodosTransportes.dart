@@ -1,17 +1,19 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kulolesa/estilos/estilo.dart';
 import 'package:kulolesa/models/sponsored_models.dart';
 
-
 class DetalheTodosTransportes extends StatefulWidget {
   final TodosTranspModel transporte;
   final String heroTag;
 
-  const DetalheTodosTransportes({super.key,required this.heroTag, required this.transporte});
+  const DetalheTodosTransportes(
+      {super.key, required this.heroTag, required this.transporte});
 
   @override
-  State<DetalheTodosTransportes> createState() => _DetalheTodosTransportesState();
+  State<DetalheTodosTransportes> createState() =>
+      _DetalheTodosTransportesState();
 }
 
 class _DetalheTodosTransportesState extends State<DetalheTodosTransportes> {
@@ -28,7 +30,8 @@ class _DetalheTodosTransportesState extends State<DetalheTodosTransportes> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                decoration: const InputDecoration(labelText: 'Número de Lugares'),
+                decoration:
+                    const InputDecoration(labelText: 'Número de Lugares'),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   numeroDeLugares = int.parse(value);
@@ -65,7 +68,8 @@ class _DetalheTodosTransportesState extends State<DetalheTodosTransportes> {
             ),
             ElevatedButton(
               onPressed: () async {
-                Navigator.pop(context); // Fechar o diálogo antes de mostrar o indicador de carregamento
+                Navigator.pop(
+                    context); // Fechar o diálogo antes de mostrar o indicador de carregamento
                 _showLoadingIndicator(context);
 
                 try {
@@ -104,7 +108,8 @@ class _DetalheTodosTransportesState extends State<DetalheTodosTransportes> {
     );
   }
 
-  Future<void> _saveAgendamento(int numeroDeLugares, DateTime? dataPartida) async {
+  Future<void> _saveAgendamento(
+      int numeroDeLugares, DateTime? dataPartida) async {
     // Implemente a lógica para salvar os dados no Firestore aqui
     try {
       await FirebaseFirestore.instance.collection('agendamentos').add({
@@ -156,6 +161,14 @@ class _DetalheTodosTransportesState extends State<DetalheTodosTransportes> {
     );
   }
 
+  bool _isFilled = false;
+
+  void _toggleHeart() {
+    setState(() {
+      _isFilled = !_isFilled;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,36 +176,76 @@ class _DetalheTodosTransportesState extends State<DetalheTodosTransportes> {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
-              expandedHeight: 300.0,
+              expandedHeight: 400.0,
               flexibleSpace: Stack(
                 children: [
                   Positioned.fill(
                     child: Hero(
-                      tag: widget.heroTag, // Tag deve ser a mesma usada no ListTile anterior
+                      tag: "transpotodos_" +
+                          widget
+                              .heroTag, // Tag deve ser a mesma usada no ListTile anterior
                       child: Container(
-                        width: MediaQuery.of(context).size.width * .1,
-
                         decoration: BoxDecoration(
+                          color: Colors.blue.shade500,
                           borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(20),
                             bottomRight: Radius.circular(20),
                           ),
-                          image: DecorationImage(
-                            image: NetworkImage(widget.transporte.img),
-                            fit: BoxFit.cover,
+                        ),
+                        width: MediaQuery.of(context).size.width * .1,
+                        height: MediaQuery.of(context).size.height * .8,
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(0),
+                            bottomRight: Radius.circular(0),
+                          ),
+                          child: Container(
+                            width: 40, // Defina o tamanho desejado
+                            height: 40, // Defina o tamanho desejado
+                            child: CachedNetworkImage(
+                              imageUrl: widget.transporte.img,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Center(
+                                child: SizedBox(
+                                  width:
+                                      30, // Tamanho do CircularProgressIndicator
+                                  height:
+                                      30, // Tamanho do CircularProgressIndicator
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error),
+                            ),
                           ),
                         ),
-                        // child:ClipRRect(
-                        //   borderRadius: BorderRadius.circular(15),
-                        //   child: SizedBox.fromSize(
-                        //     size: Size.fromRadius(
-                        //         MediaQuery.of(context).size.height * .25),
-                        //     child: Image.asset(
-                        //       widget.transporte.img,
-                        //       fit: BoxFit.cover,
-                        //     ),
-                        //   ),
-                        // ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 60,
+                    left: 10,
+                    child: GestureDetector(
+                      onTap: _toggleHeart,
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(.5),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: _isFilled
+                            ? Icon(
+                                Icons.favorite,
+                                size: 25,
+                                color: Colors.white,
+                              )
+                            : Icon(
+                                Icons.favorite_border,
+                                size: 25,
+                                color: Colors.white,
+                              ),
                       ),
                     ),
                   ),
@@ -205,16 +258,23 @@ class _DetalheTodosTransportesState extends State<DetalheTodosTransportes> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    widget.transporte.sponsor == true ? Container(
-                      margin: const EdgeInsets.only(bottom: 15),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2) ,
-                      decoration: BoxDecoration(color: EstiloApp.primaryColor.withOpacity(.3),
-                        border:Border.all(color: Colors.blueGrey, width: 1),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: const Text("Patrocinado", style: TextStyle(fontWeight: FontWeight.w400),),
-                    ) :
-                    const Text(""),
+                    widget.transporte.sponsor == true
+                        ? Container(
+                            margin: const EdgeInsets.only(bottom: 15),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: EstiloApp.primaryColor.withOpacity(.3),
+                              border:
+                                  Border.all(color: Colors.blueGrey, width: 1),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: const Text(
+                              "Patrocinado",
+                              style: TextStyle(fontWeight: FontWeight.w400),
+                            ),
+                          )
+                        : const Text(""),
                     Text(
                       widget.transporte.nome,
                       style: const TextStyle(

@@ -12,9 +12,10 @@ import '../models/usuariosModel.dart';
 
 class DetalhesTransportePage extends StatefulWidget {
   final TodosTranspModel transporte;
-  final  heroTag;
+  final heroTag;
 
-  const DetalhesTransportePage({super.key, required this.heroTag, required this.transporte});
+  const DetalhesTransportePage(
+      {super.key, required this.heroTag, required this.transporte});
 
   @override
   State<DetalhesTransportePage> createState() => _DetalhesTransportePageState();
@@ -34,7 +35,8 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                decoration: const InputDecoration(labelText: 'Número de Lugares'),
+                decoration:
+                    const InputDecoration(labelText: 'Número de Lugares'),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   numeroDeLugares = int.parse(value);
@@ -55,9 +57,10 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                 child: Row(
                   children: [
                     Text("Pagamento: "),
-                    Text("Em Espécie", style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                    )),
+                    Text("Em Espécie",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                        )),
                   ],
                 ),
               ),
@@ -92,7 +95,8 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                Navigator.pop(context); // Fechar o diálogo antes de mostrar o indicador de carregamento
+                Navigator.pop(
+                    context); // Fechar o diálogo antes de mostrar o indicador de carregamento
                 _showLoadingIndicator(context);
 
                 try {
@@ -104,7 +108,7 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                     PageTransition(
                       type: PageTransitionType.fade,
                       duration: const Duration(milliseconds: 250),
-                      child:  SucessoAG(titulo: "Seu agendamento"),
+                      child: SucessoAG(titulo: "Seu agendamento"),
                     ),
                   );
                 } catch (error) {
@@ -139,11 +143,10 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
     );
   }
 
-  Future<void> _saveAgendamento(int numeroDeLugares, DateTime? dataPartida) async {
-
+  Future<void> _saveAgendamento(
+      int numeroDeLugares, DateTime? dataPartida) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userData = userProvider.user;
-
 
     // Implemente a lógica para salvar os dados no Firestore aqui
     try {
@@ -163,16 +166,22 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
 
       await FirebaseFirestore.instance.collection('notificacoes').add({
         'para': widget.transporte.conta,
-        'conteudo': "${userData!.fullName.split(" ")[0]} fez uma reserva de $numeroDeLugares lugares no seu transporte "+ widget.transporte.nome + " abra a app e entre em contacto com ${userData!.fullName}",
+        'conteudo':
+            "${userData!.fullName.split(" ")[0]} fez uma reserva de $numeroDeLugares lugares no seu transporte " +
+                widget.transporte.nome +
+                " abra a app e entre em contacto com ${userData!.fullName}",
         'nome': userData!.fullName,
         'foto': userData!.profilePic,
         'status': 'pendente',
-        'lido': false,// Você pode adicionar mais campos conforme necessário
-        'quando': FieldValue.serverTimestamp(), // Para registrar a data e hora do pedido
+        'lido': false, // Você pode adicionar mais campos conforme necessário
+        'quando': FieldValue
+            .serverTimestamp(), // Para registrar a data e hora do pedido
       });
 
       // Supondo que 'lugares' seja a chave para o número de lugares na tabela de transportes
-      var transportRef = FirebaseFirestore.instance.collection('transportes').doc(widget.transporte.id);
+      var transportRef = FirebaseFirestore.instance
+          .collection('transportes')
+          .doc(widget.transporte.id);
 
       int lugaresDisponiveis = 0;
 
@@ -180,7 +189,6 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
         DocumentSnapshot snapshot = await transaction.get(transportRef);
         lugaresDisponiveis = int.parse(snapshot['lugares']);
       });
-
 
       int lugaresReservados = numeroDeLugares;
       int lugaresRestantes = lugaresDisponiveis - lugaresReservados;
@@ -193,8 +201,6 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
         // Atualiza o número de lugares disponíveis na tabela de transportes
         await transportRef.update({'lugares': lugaresRestantes.toString()});
       }
-
-
 
       // await FirebaseFirestore.instance.collection('notificacoes').add({
       //   'para': userData!.uniqueID,
@@ -210,12 +216,9 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
         PageTransition(
           type: PageTransitionType.fade,
           duration: const Duration(milliseconds: 250),
-          child:  SucessoAG(titulo: "Seu agendamento"),
+          child: SucessoAG(titulo: "Seu agendamento"),
         ),
       );
-
-
-
     } catch (error) {
       rethrow;
     }
@@ -261,12 +264,10 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
     );
   }
 
-
   String DataFormatada = "";
   DateTime tgl = DateTime.now();
   DateTime now = DateTime.now();
   final TextStyle valueStyle = const TextStyle(fontSize: 16.0);
-
 
   Future<void> _selectedDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -278,7 +279,7 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
     if (picked != null && picked != tgl) {
       setState(() {
         tgl = picked;
-        if(tgl.isBefore(now)){
+        if (tgl.isBefore(now)) {
           // timerSnackbar(
           //   context: context,
           //   backgroundColor: Colors.red[500],
@@ -288,12 +289,10 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
           //   afterTimeExecute: () => print('acionado'),
           //   second: 8,
           // );
-        }
-        else{
+        } else {
           DataFormatada = DateFormat.yMEd().format(tgl);
           print(tgl);
         }
-
       });
     } else {}
   }
@@ -311,13 +310,12 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
 
   void pegarComments() async {
     // Obter a lista de comentários do Firestore
-    List<ReviewsAcomModel> comentarios = await ReviewsAcomModel.getReviewAcom(widget.transporte.id);
+    List<ReviewsAcomModel> comentarios =
+        await ReviewsAcomModel.getReviewAcom(widget.transporte.id);
 
     // Filtrar os comentários que correspondem à acomodação atual
     comentariosFiltrados = comentarios.toList();
   }
-
-
 
 // Função para formatar a data
   String formatarData(DateTime data) {
@@ -325,25 +323,32 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
     return dateFormat.format(data);
   }
 
+  bool _isFilled = false;
+
+  void _toggleHeart() {
+    setState(() {
+      _isFilled = !_isFilled;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-
     fetchUsuarios();
     pegarComments();
-
 
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-
             SliverAppBar(
-              expandedHeight: 300.0,
+              expandedHeight: 400.0,
               flexibleSpace: Stack(
                 children: [
                   Positioned.fill(
                     child: Hero(
-                      tag: widget.heroTag+"wedw", // Tag deve ser a mesma usada no ListTile anterior
+                      tag: "transptodos_" +
+                          widget
+                              .heroTag, // Tag deve ser a mesma usada no ListTile anterior
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.blue.shade500,
@@ -353,66 +358,101 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                           ),
                         ),
                         width: MediaQuery.of(context).size.width * .1,
-                        height: MediaQuery.of(context).size.height * .9,
+                        height: MediaQuery.of(context).size.height * .8,
                         child: ClipRRect(
                           borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(20),
-                            bottomRight: Radius.circular(20),
+                            bottomLeft: Radius.circular(0),
+                            bottomRight: Radius.circular(0),
                           ),
                           child: Container(
-                            width: 40,  // Defina o tamanho desejado
+                            width: 40, // Defina o tamanho desejado
                             height: 40, // Defina o tamanho desejado
                             child: CachedNetworkImage(
                               imageUrl: widget.transporte.img,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Center(
                                 child: SizedBox(
-                                  width: 30, // Tamanho do CircularProgressIndicator
-                                  height: 30, // Tamanho do CircularProgressIndicator
+                                  width:
+                                      30, // Tamanho do CircularProgressIndicator
+                                  height:
+                                      30, // Tamanho do CircularProgressIndicator
                                   child: CircularProgressIndicator(
                                     color: Colors.white,
                                   ),
                                 ),
                               ),
-                              errorWidget: (context, url, error) => Icon(Icons.error),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error),
                             ),
                           ),
-
                         ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 60,
+                    left: 10,
+                    child: GestureDetector(
+                      onTap: _toggleHeart,
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(.5),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: _isFilled
+                            ? Icon(
+                                Icons.favorite,
+                                size: 25,
+                                color: Colors.white,
+                              )
+                            : Icon(
+                                Icons.favorite_border,
+                                size: 25,
+                                color: Colors.white,
+                              ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
             SliverToBoxAdapter(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    widget.transporte.sponsor == true ? Container(
-                      margin: const EdgeInsets.only(bottom: 15),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2) ,
-                      decoration: BoxDecoration(color: EstiloApp.primaryColor.withOpacity(.3),
-                      border:Border.all(color: Colors.blueGrey, width: 1),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: const Text("Patrocinado", style: TextStyle(fontWeight: FontWeight.w400),),
-                    ) :
-                    const Text(""),
+                    widget.transporte.sponsor == true
+                        ? Container(
+                            margin: const EdgeInsets.only(bottom: 15),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: EstiloApp.primaryColor.withOpacity(.3),
+                              border:
+                                  Border.all(color: Colors.blueGrey, width: 1),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: const Text(
+                              "Patrocinado",
+                              style: TextStyle(fontWeight: FontWeight.w400),
+                            ),
+                          )
+                        : const Text(""),
                     Text(
                       widget.transporte.nome,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24.0,
+                        color: Colors.blue[700],
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 20.0),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined),
+                        const Icon(Icons.location_on_outlined,
+                            color: Colors.blue),
                         const SizedBox(width: 4.0),
                         Text(widget.transporte.local),
                       ],
@@ -420,18 +460,24 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                     const SizedBox(height: 8.0),
                     Row(
                       children: [
-                        const Icon(Icons.arrow_downward_rounded),
+                        const Icon(Icons.arrow_downward_rounded,
+                            color: Colors.blue),
                         const SizedBox(width: 4.0),
                         Text(widget.transporte.destino),
                       ],
                     ),
-
+                    const SizedBox(height: 10.0),
+                    Divider(
+                      thickness: 1,
+                      color: Colors.blue,
+                    ),
                     const SizedBox(height: 10.0),
                     Row(
                       children: [
-
-                        Icon(Icons.people_alt_outlined,),
-                        const SizedBox(width:4.0),
+                        Icon(
+                          Icons.people_alt_outlined,
+                        ),
+                        const SizedBox(width: 4.0),
                         Text(
                           'Disponível ',
                           style: const TextStyle(
@@ -450,8 +496,10 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                     const SizedBox(height: 10.0),
                     Row(
                       children: [
-                        Icon(Icons.watch_later_outlined,),
-                        const SizedBox(width:4.0),
+                        Icon(
+                          Icons.watch_later_outlined,
+                        ),
+                        const SizedBox(width: 4.0),
                         Text(
                           'Parte em ',
                           style: const TextStyle(
@@ -467,15 +515,8 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16.0),
-                    Text(
-                      'Preço: ${widget.transporte.preco} Kz / lugar',
-                      style: const TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 23.0),
+
+                    const SizedBox(height: 10.0),
                     Divider(
                       thickness: 1,
                       color: Colors.blue,
@@ -492,42 +533,28 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                     Text(widget.transporte.descricao),
                     const SizedBox(height: 16.0),
 
-                    Center(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * .9,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _showAgendamentoDialog(context);
-                          },
-                          child: const Text('Reservar'),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16.0),
-
-
                     // Exibir comentários da acomodação
                     Container(
                       alignment: Alignment.topLeft,
-                      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 5),
                       child: comentariosFiltrados.isNotEmpty
                           ? const Text(
-                        "Avaliações de clientes",
-                        style:
-                        TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                      )
+                              "Avaliações de clientes",
+                              style: TextStyle(
+                                  fontSize: 25, fontWeight: FontWeight.bold),
+                            )
                           : const Text(""),
                     ),
                     Column(
                       children: comentariosFiltrados.map((comentario) {
-                        UsuarioModel usuario =
-                        usuarios.firstWhere((user) => user.id == comentario.quemId);
+                        UsuarioModel usuario = usuarios
+                            .firstWhere((user) => user.id == comentario.quemId);
 
                         return Container(
                           width: MediaQuery.of(context).size.width * 10,
-                          margin:
-                          const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 0),
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                               color: Colors.white,
@@ -560,10 +587,14 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Container(
-                                          width: MediaQuery.of(context).size.width * .5,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              .5,
                                           child: Text(
                                             usuario.nome,
                                             overflow: TextOverflow.ellipsis,
@@ -573,10 +604,13 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                                             ),
                                           ),
                                         ),
-                                        Text(comentario.rating.toString(),  style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),),
+                                        Text(
+                                          comentario.rating.toString(),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     Text(comentario.coment),
@@ -598,7 +632,6 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                       }).toList(),
                     ),
 
-
                     // ElevatedButton(
                     //   onPressed: () {
                     //     // Navigator.push(
@@ -608,12 +641,67 @@ class _DetalhesTransportePageState extends State<DetalhesTransportePage> {
                     //   },
                     //   child: const Text('Meus Agendamentos'),
                     // ),
-
                   ],
                 ),
               ),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        elevation: 2,
+        color: Colors.black,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                child: Row(
+                  children: [
+                    Text(
+                      "AOA ",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      "" + widget.transporte.preco,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Spacer(),
+              Container(
+                width: 115,
+                height: 100,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                    ),
+                    backgroundColor: MaterialStateProperty.all(Colors.blue),
+                  ),
+                  onPressed: () {
+                    _showAgendamentoDialog(context);
+                  },
+                  child: Text(
+                    "Reservar",
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

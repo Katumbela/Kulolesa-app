@@ -25,24 +25,6 @@ class DetalheActividades extends StatefulWidget {
 class _DetalheActividadesState extends State<DetalheActividades> {
   DateTime? dataReserva;
 
-  //
-  // Future<void> _selectEntryDate(BuildContext context) async {
-  //   final DateTime? picked = await showDatePicker(
-  //     context: context,
-  //     initialDate: entryDate ?? DateTime.now(),
-  //     firstDate: DateTime.now(),
-  //     lastDate: DateTime(2050),
-  //   );
-  //
-  //   if (picked != null && picked != entryDate) {
-  //     setState(() {
-  //       entryDate = picked;
-  //     });
-  //   }
-  // }
-  //
-
-
   List<UsuarioModel> usuarios = [];
   List<ReviewsAcomModel> comentariosFiltrados = [];
 
@@ -55,7 +37,8 @@ class _DetalheActividadesState extends State<DetalheActividades> {
 
   void pegarComments() async {
     // Obter a lista de comentários do Firestore
-    List<ReviewsAcomModel> comentarios = await ReviewsAcomModel.getReviewAcom(widget.actividade.id);
+    List<ReviewsAcomModel> comentarios =
+        await ReviewsAcomModel.getReviewAcom(widget.actividade.id);
 
     // Filtrar os comentários que correspondem à acomodação atual
     comentariosFiltrados = comentarios.toList();
@@ -247,12 +230,20 @@ class _DetalheActividadesState extends State<DetalheActividades> {
     // _selectReservaDate();
   }
 
-
 // Função para formatar a data
   String formatarData(DateTime data) {
     final dateFormat = DateFormat("d MMM y");
     return dateFormat.format(data);
   }
+
+  bool _isFilled = false;
+
+  void _toggleHeart() {
+    setState(() {
+      _isFilled = !_isFilled;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // _selectReservaDate();
@@ -262,7 +253,7 @@ class _DetalheActividadesState extends State<DetalheActividades> {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
-              expandedHeight: 300.0,
+              expandedHeight: 350.0,
               flexibleSpace: Stack(
                 children: [
                   Positioned.fill(
@@ -282,8 +273,8 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                         height: MediaQuery.of(context).size.height * .8,
                         child: ClipRRect(
                           borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(20),
-                            bottomRight: Radius.circular(20),
+                            bottomLeft: Radius.circular(0),
+                            bottomRight: Radius.circular(0),
                           ),
                           child: Container(
                             width: 40, // Defina o tamanho desejado
@@ -307,6 +298,31 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                             ),
                           ),
                         ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 60,
+                    left: 10,
+                    child: GestureDetector(
+                      onTap: _toggleHeart,
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(.5),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: _isFilled
+                            ? Icon(
+                                Icons.favorite,
+                                size: 25,
+                                color: Colors.red,
+                              )
+                            : Icon(
+                                Icons.favorite_border,
+                                size: 25,
+                                color: Colors.white,
+                              ),
                       ),
                     ),
                   ),
@@ -338,23 +354,23 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                         : const Text(""),
                     Text(
                       widget.actividade.actividade,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24.0,
+                        color: Colors.blue[700],
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8.0),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined),
+                        Icon(Icons.location_on_outlined,
+                            color: Colors.blue[600]),
                         const SizedBox(width: 4.0),
                         Text(widget.actividade.local),
                       ],
                     ),
-                    const SizedBox(height: 8.0),
-
                     const SizedBox(height: 16.0),
-                    Row(
+                    /*Row(
                       children: [
                         Text(
                           'Preço:',
@@ -371,12 +387,13 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 16.0),
-                    const Text(
-                      'Descrição da actividade:',
+                    ),*/
+                    const SizedBox(height: 26.0),
+                    Text(
+                      'Descrição:',
                       style: TextStyle(
                         fontSize: 18.0,
+                        color: Colors.blue[700],
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -408,17 +425,14 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 16.0),
-
-                    Text("Escolha a data",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                        ),
+                    Text(
+                      "Escolha a data",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-
                     const SizedBox(height: 16.0),
-
                     Container(
                       margin: const EdgeInsets.only(top: 6),
                       padding: const EdgeInsets.symmetric(
@@ -449,40 +463,30 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                               ),
                       ),
                     ),
-
                     const SizedBox(height: 26.0),
-
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     // Navigator.push(
-                    //     //   context,
-                    //     //   MaterialPageRoute(builder: (context) => AgendamentosPage()),
-                    //     // );
-                    //   },
-                    //   child: const Text('Meus Agendamentos'),
-                    // ),
-
-
                     Container(
                       alignment: Alignment.topLeft,
-                      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 5),
                       child: comentariosFiltrados.isNotEmpty
-                          ? const Text(
-                        "Avaliações de clientes",
-                        style:
-                        TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                      )
+                          ? Text(
+                              "Avaliações de clientes",
+                              style: TextStyle(
+                                  color: Colors.blue[700],
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold),
+                            )
                           : const Text(""),
                     ),
                     Column(
                       children: comentariosFiltrados.map((comentario) {
-                        UsuarioModel usuario =
-                        usuarios.firstWhere((user) => user.id == comentario.quemId);
+                        UsuarioModel usuario = usuarios
+                            .firstWhere((user) => user.id == comentario.quemId);
 
                         return Container(
                           width: MediaQuery.of(context).size.width * 10,
-                          margin:
-                          const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 0),
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                               color: Colors.white,
@@ -515,10 +519,14 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Container(
-                                          width: MediaQuery.of(context).size.width * .5,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              .5,
                                           child: Text(
                                             usuario.nome,
                                             overflow: TextOverflow.ellipsis,
@@ -528,10 +536,13 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                                             ),
                                           ),
                                         ),
-                                        Text(comentario.rating.toString(),  style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),),
+                                        Text(
+                                          comentario.rating.toString(),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     Text(comentario.coment),
@@ -564,6 +575,7 @@ class _DetalheActividadesState extends State<DetalheActividades> {
       ),
       bottomNavigationBar: BottomAppBar(
         elevation: 2,
+        color: Colors.black,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: Row(
@@ -574,14 +586,14 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                     Text(
                       "AOA ",
                       style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
+                        color: Colors.white,
+                        fontSize: 18,
                       ),
                     ),
                     Text(
                       "" + widget.actividade.preco,
                       style: TextStyle(
-                        color: Colors.grey[800],
+                        color: Colors.white,
                         fontSize: 25,
                       ),
                     ),
@@ -590,13 +602,13 @@ class _DetalheActividadesState extends State<DetalheActividades> {
               ),
               Spacer(),
               Container(
-                width: 105,
+                width: 115,
                 height: 100,
                 child: ElevatedButton(
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                     ),
                     backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -606,7 +618,10 @@ class _DetalheActividadesState extends State<DetalheActividades> {
                   },
                   child: Text(
                     'Reservar',
-                    style: TextStyle(fontSize: 12, color: Colors.white),
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),
